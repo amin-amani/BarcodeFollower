@@ -5,11 +5,16 @@
 #include <QStringList>
 
 
-typedef struct{
- int x;
- int y;
+struct Point{
+     int x;
+     int y;
+     inline Point operator=(Point a) {
+         x=a.x;
+         y=a.y;
+         return a;
+     }
 
-}Point;
+};
 
 typedef struct{
  double a;

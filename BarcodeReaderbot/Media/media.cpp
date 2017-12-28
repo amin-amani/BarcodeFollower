@@ -22,19 +22,20 @@ Media::Media(QObject *parent) : QObject(parent)
 Media::MEDIA_ERROS Media::Init(QString portName,int baudrate,int byteTimeout,QSerialPort::FlowControl flowControl)
 {
     _timeout=0;
-    _comport.setPortName(portName);
-    _comport.setBaudRate(baudrate);
-    _comport.setReadBufferSize(10000);
-    _comport.setFlowControl(flowControl);
+    _comport = new QSerialPort();
+    _comport->setPortName(portName);
+    _comport->setBaudRate(baudrate);
+    _comport->setReadBufferSize(10000);
+    _comport->setFlowControl(flowControl);
     _eachBytetimeout=byteTimeout;
 
-    if(_comport.isOpen())return MEDIA_ERROS_DEVICE_NOT_OPEN;
+    if(_comport->isOpen())return MEDIA_ERROS_DEVICE_NOT_OPEN;
 
-    _comport.open(QSerialPort::ReadWrite);
+    _comport->open(QSerialPort::ReadWrite);
 
-    if(!_comport.isOpen()){return MEDIA_ERROS_DEVICE_NOT_OPEN;}
-    connect(&_comport,SIGNAL(readyRead()),this,SLOT(ComportReadyRead()));
-    connect(&_comport,SIGNAL(error(QSerialPort::SerialPortError)),this,SLOT(ComportError(QSerialPort::SerialPortError)));
+    if(!_comport->isOpen()){return MEDIA_ERROS_DEVICE_NOT_OPEN;}
+    connect(_comport,SIGNAL(readyRead()),this,SLOT(ComportReadyRead()));
+    connect(_comport,SIGNAL(error(QSerialPort::SerialPortError)),this,SLOT(ComportError(QSerialPort::SerialPortError)));
     connect(&_timer,SIGNAL(timeout()),this,SLOT(ReceiveDataTimeout()));
     return MEDIA_ERROS_OK;
 }
@@ -43,17 +44,16 @@ Media::MEDIA_ERROS Media::WriteCommand(QByteArray command,QByteArray&response,in
     bool result=false;
     QSignalSpy waitForResPonse(this,SIGNAL(ReceiveDataCompleted()));
     QSignalSpy waitForNoting(this,SIGNAL(Dummy()));
-    if(!_comport.isOpen()){
-        _comport.open(QSerialPort::ReadWrite);
+    if(!_comport->isOpen()){
+        _comport->open(QSerialPort::ReadWrite);
         return MEDIA_ERROS_DEVICE_NOT_OPEN;
     }
-    if(_comport.bytesAvailable()>0){ _comport.readAll();}
+    if(_comport->bytesAvailable()>0){ _comport->readAll();}
     _buffer.clear();
-
-    if(!_comport.write(command)){
-        return MEDIA_ERROS_WRITE_ERROR;
+    if(!_comport->write(command)){
+       return MEDIA_ERROS_WRITE_ERROR;
     }
-    _comport.flush();
+    _comport->flush();
 #ifdef MediaTrace
   //  qDebug()<<"===================================================================";
  //   qDebug()<<">>"<<command.toHex();
@@ -103,38 +103,45 @@ void Media::ClearBuffer()
 }
 void Media::SetRTS(bool value)
 {
-    _comport.setRequestToSend(value);
+    _comport->setRequestToSend(value);
 }
 void Media::SetDTR(bool value)
 {
-    _comport.setDataTerminalReady(value);
+    _comport->setDataTerminalReady(value);
 }
 //========================================================================================================================================
 void Media::ComportReadyRead(){
-    QByteArray data= _comport.readAll();
-//            _comport.waitForReadyRead(300);
+    QByteArray data= _comport->readAll();
+//            _comport->waitForReadyRead(300);
     _buffer.append(data);
     emit ReadyRead(_buffer);
     _timeout=0;
 }
 //========================================================================================================================================
+QByteArray Media::ComportData(){
+    QByteArray data= _comport->readAll();
+//            _comport->waitForReadyRead(300);
+    _buffer.append(data);
+    return _buffer;
+}
+//========================================================================================================================================
 void Media::Disconnect(){
-    if (_comport.isOpen()){
+    if (_comport->isOpen()){
         //qInfo() << "media close";
-        _comport.waitForBytesWritten(400);
-        _comport.readAll();
-        _comport.waitForReadyRead(1000);
-        _comport.close();
+        _comport->waitForBytesWritten(400);
+        _comport->readAll();
+        _comport->waitForReadyRead(1000);
+        _comport->close();
     }
 }
 //========================================================================================================================================
 void Media::ComportError(QSerialPort::SerialPortError e){
-    if(_comport.isOpen()){
+    if(_comport->isOpen()){
         const QMetaObject &mo = QSerialPort::staticMetaObject;
         int index = mo.indexOfEnumerator("SerialPortError");
         QMetaEnum metaEnum = mo.enumerator(index);
        // qInfo()<<"MEDIA Error:" <<metaEnum.valueToKey(e);
-        _comport.close();
+        _comport->close();
     }
 }
 //========================================================================================================================================

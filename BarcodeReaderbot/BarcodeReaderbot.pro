@@ -12,7 +12,7 @@ TARGET = BarcodeReaderbot
 CONFIG   += console
 CONFIG   -= app_bundle
 
-target.path += /home/pi/Desktop
+target.path += /root
 INSTALLS += target
 
 TEMPLATE = app
@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     robot.cpp \
     scanner.cpp \
     tcpserver.cpp \
-    Media/media.cpp
+    Media/media.cpp \
+    xl320.cpp
 
 HEADERS += \
     controller.h \
@@ -34,4 +35,5 @@ HEADERS += \
     robot.h \
     scanner.h \
     tcpserver.h \
-    Media/media.h
+    Media/media.h \
+    xl320.h

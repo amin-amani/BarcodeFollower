@@ -2,12 +2,12 @@
 
 TCPServer::TCPServer(QObject *parent) : QObject(parent)
 {
-
+_connected=false;
 }
 
 TCPServer::TCPServer(int tcpPort){
 
-
+_connected=false;
     if(_tcpServer.listen(QHostAddress::Any,tcpPort)!=true){
         printf("Error on starting server on port:%d\n",tcpPort);
         return;
@@ -22,17 +22,29 @@ void TCPServer::TcpServerNewConnection(){
 
     connect(_socket,SIGNAL(readyRead()),this,SLOT(SocketReadyRead()));
     connect(_socket,SIGNAL(disconnected()),this,SLOT(SocketDisconnected()));
+    _connected=true;
 
 
 }
 void TCPServer::SocketReadyRead(){
 
     QByteArray Data = _socket->readAll();
-_socket->write("ans");
-qDebug(Data.data());
+
+emit DataReady(Data);
 }
 void TCPServer::SocketDisconnected(){
 
     _socket->deleteLater();
+    _connected=false;
 
+
+}
+
+void TCPServer::SendString(QString input){
+    if(_connected)
+    _socket->write(input.toLatin1());
+}
+bool TCPServer::Connected()
+{
+   return _connected;
 }

@@ -88,6 +88,17 @@ unsigned int Dynamixel::SetPosition(unsigned char id,unsigned int position,unsig
 //    }
 
 }
+
+unsigned int Dynamixel::GetSensor(){
+    QByteArray packet,reply;
+    packet.append(0x61);
+    packet.append(0x61);
+    packet.append(0x61);
+    packet.append(0x61);
+    reply = SendCommand(packet);
+    qDebug(reply);
+}
+
 unsigned int Dynamixel::ReadPosition(unsigned char id){
     QByteArray packet,replay;
     packet.push_back(id);

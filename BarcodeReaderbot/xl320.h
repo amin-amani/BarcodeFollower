@@ -1,11 +1,12 @@
-#ifndef DYNAMIXEL_H
-#define DYNAMIXEL_H
+#ifndef XL320_H
+#define XL320_H
 
 #include <QObject>
+#include <QDebug>
 #include "Media/media.h"
 
 //#########################################################################
-//################ define - Dynamixel Hex code table ######################
+//################ define - XL320 Hex code table ######################
 // EEPROM AREA
 #define EEPROM_MODEL_NUMBER_L           0x00
 #define EEPROM_MODEL_NUMBER_H           0x01
@@ -17,39 +18,39 @@
 #define EEPROM_CW_ANGLE_LIMIT_H         0x07
 #define EEPROM_CCW_ANGLE_LIMIT_L        0x08
 #define EEPROM_CCW_ANGLE_LIMIT_H        0x09
-#define EEPROM_LIMIT_TEMPERATURE        0x0B
-#define EEPROM_LOW_LIMIT_VOLTAGE        0x0C
-#define EEPROM_HIGN_LIMIT_VOLTAGE       0x0D
-#define EEPROM_MAX_TORQUE_L             0x0E
-#define EEPROM_MAX_TORQUE_H             0x0F
-#define EEPROM_RETURN_LEVEL             0x10
-#define EEPROM_ALARM_LED                0x11
+#define EEPROM_CONTROL_MODE             0x0B
+#define EEPROM_LIMIT_TEMPERATURE        0x0C
+#define EEPROM_LOW_LIMIT_VOLTAGE        0x0D
+#define EEPROM_HIGN_LIMIT_VOLTAGE       0x0E
+#define EEPROM_MAX_TORQUE_L             0x0F
+#define EEPROM_MAX_TORQUE_H             0x10
+#define EEPROM_RETURN_LEVEL             0x11
 #define EEPROM_ALARM_SHUTDOWN           0x12
 // RAM AREA
 #define RAM_TORQUE_ENABLE               0x18
 #define RAM_LED                         0x19
-#define RAM_PROPORTIONAL_GAIN           0x1C
-#define RAM_INTERGRAL_GAIN              0x1B
-#define RAM_DERIVATIVE_GAIN             0x1A
+#define RAM_DERIVATIVE_GAIN             0x1B
+#define RAM_INTERGRAL_GAIN              0x1C
+#define RAM_PROPORTIONAL_GAIN           0x1D
 #define RAM_GOAL_POSITION_L             0x1E
 #define RAM_GOAL_POSITION_H             0x1F
 #define RAM_GOAL_SPEED_L                0x20
 #define RAM_GOAL_SPEED_H                0x21
-#define RAM_TORQUE_LIMIT_L              0x22
-#define RAM_TORQUE_LIMIT_H              0x23
-#define RAM_PRESENT_POSITION_L          0x24
-#define RAM_PRESENT_POSITION_H          0x25
-#define RAM_PRESENT_SPEED_L             0x26
-#define RAM_PRESENT_SPEED_H             0x27
-#define RAM_PRESENT_LOAD_L              0x28
-#define RAM_PRESENT_LOAD_H              0x29
-#define RAM_PRESENT_VOLTAGE             0x2A
-#define RAM_PRESENT_TEMPERATURE         0x2B
-#define RAM_REGISTER                    0x2C
-#define RAM_MOVING                      0x2E
-#define RAM_LOCK                        0x2F
-#define RAM_PUNCH_L                     0x30
-#define RAM_PUNCH_H                     0x31
+#define RAM_TORQUE_LIMIT_L              0x23
+#define RAM_TORQUE_LIMIT_H              0x24
+#define RAM_PRESENT_POSITION_L          0x25
+#define RAM_PRESENT_POSITION_H          0x26
+#define RAM_PRESENT_SPEED_L             0x27
+#define RAM_PRESENT_SPEED_H             0x28
+#define RAM_PRESENT_LOAD_L              0x29
+#define RAM_PRESENT_LOAD_H              0x2A
+#define RAM_PRESENT_VOLTAGE             0x2D
+#define RAM_PRESENT_TEMPERATURE         0x2E
+#define RAM_REGISTER                    0x2F
+#define RAM_MOVING                      0x31
+#define RAM_HARDWARE_ERROR_STATUS       0x32
+#define RAM_PUNCH_L                     0x33
+#define RAM_PUNCH_H                     0x34
 
 
 //#########################################################################
@@ -125,7 +126,7 @@
 
 #define STATUS_PACKET_TIMEOUT           50      // in millis()
 #define STATUS_FRAME_BUFFER             5
-class Dynamixel : public QObject
+class XL320 : public QObject
 {
     Q_OBJECT
 private:
@@ -133,20 +134,22 @@ private:
 
     QByteArray SendCommand(QByteArray command);
 public:
-    explicit Dynamixel(QObject *parent = 0);
+    explicit XL320(QObject *parent = 0);
 
     void Init(QString portName, int baudRate);
     unsigned int ReadPosition(unsigned char id);
-    unsigned int SetPosition(unsigned char id, unsigned int position, unsigned int speed);
+    unsigned int SetPosition(unsigned char id,  int speed);
     void SetLed(unsigned char id, bool status);
     unsigned int ReadVoltage(int id);
     unsigned int ReadTemperature(int id);
     unsigned int Ping(int id);
     void SetTorqueEnable(unsigned char id, bool status);
-    unsigned int GetSensor();
+    bool GetSensor(unsigned int *result);
+    void Close();
+    unsigned short update_crc(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size);
 signals:
 
 public slots:
 };
 
-#endif // DYNAMIXEL_H
+#endif // XL320_H

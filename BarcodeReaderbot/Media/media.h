@@ -34,12 +34,12 @@ class Media : public QObject
 {
     Q_OBJECT
 private:
-
+    QByteArray _buffer;
     /**
      * @brief Serial port instance
      */
-    QSerialPort _comport;
-    QByteArray _buffer;
+    QSerialPort *_comport;
+
     /**
      * @brief generates event if byte receive complete
      */
@@ -49,6 +49,7 @@ private:
 
 
 public:
+
     typedef enum{
         MEDIA_ERROS_DEVICE_NOT_OPEN=-1,
         MEDIA_ERROS_OK=0,
@@ -89,6 +90,7 @@ public:
     void ClearBuffer();
     void SetDTR(bool value);
     void SetRTS(bool value);
+    QByteArray ComportData();
 signals:
         /**
          *
